@@ -2,7 +2,7 @@ import speedtest
 import sys
 
 
-def test():
+def speed():
     servers = []
     # If you want to test against a specific server
     # servers = [1234]
@@ -23,8 +23,11 @@ def test():
     sys.stdout.write('\r')
     sys.stdout.flush()
 
-
-
     results_dict = s.results.dict()  # Resultats format dictionnaire
 
     return results_dict
+
+
+if __name__ == "__main__":
+    results = test()
+    print(results)

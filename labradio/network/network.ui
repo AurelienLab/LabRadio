@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NetworkUI</class>
- <widget class="QWidget" name="NetworkUI">
+ <class>Network</class>
+ <widget class="QWidget" name="Network">
   <property name="geometry">
    <rect>
     <x>0</x>

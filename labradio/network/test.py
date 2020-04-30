@@ -2,7 +2,7 @@ import speedtest
 import sys
 
 
-def speed():
+def speed(progress_callback=None):
     servers = []
     # If you want to test against a specific server
     # servers = [1234]
@@ -29,5 +29,4 @@ def speed():
 
 
 if __name__ == "__main__":
-    results = test()
-    print(results)
+    print(speed())

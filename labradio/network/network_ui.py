@@ -10,11 +10,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_NetworkUI(object):
-    def setupUi(self, NetworkUI):
-        NetworkUI.setObjectName("NetworkUI")
-        NetworkUI.resize(890, 618)
-        self.gridLayoutWidget_3 = QtWidgets.QWidget(NetworkUI)
+class Ui_Network(object):
+    def setupUi(self, Network):
+        Network.setObjectName("Network")
+        Network.resize(890, 618)
+        self.gridLayoutWidget_3 = QtWidgets.QWidget(Network)
         self.gridLayoutWidget_3.setGeometry(QtCore.QRect(0, 0, 891, 621))
         self.gridLayoutWidget_3.setObjectName("gridLayoutWidget_3")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget_3)
@@ -111,25 +111,25 @@ class Ui_NetworkUI(object):
         self.speedTestButton.setObjectName("speedTestButton")
         self.gridLayout_2.addWidget(self.speedTestButton, 1, 0, 1, 1)
 
-        self.retranslateUi(NetworkUI)
-        QtCore.QMetaObject.connectSlotsByName(NetworkUI)
+        self.retranslateUi(Network)
+        QtCore.QMetaObject.connectSlotsByName(Network)
 
-    def retranslateUi(self, NetworkUI):
+    def retranslateUi(self, Network):
         _translate = QtCore.QCoreApplication.translate
-        NetworkUI.setWindowTitle(_translate("NetworkUI", "Form"))
-        self.label_2.setText(_translate("NetworkUI", "IP Publique:"))
-        self.label.setText(_translate("NetworkUI", "IP Locale:"))
-        self.getIpButton.setText(_translate("NetworkUI", "Récupérer les IP"))
-        self.label_4.setText(_translate("NetworkUI", "Download:"))
-        self.label_3.setText(_translate("NetworkUI", "Upload:"))
-        self.speedTestButton.setText(_translate("NetworkUI", "Lancer le Speedtest"))
+        Network.setWindowTitle(_translate("Network", "Form"))
+        self.label_2.setText(_translate("Network", "IP Publique:"))
+        self.label.setText(_translate("Network", "IP Locale:"))
+        self.getIpButton.setText(_translate("Network", "Récupérer les IP"))
+        self.label_4.setText(_translate("Network", "Download:"))
+        self.label_3.setText(_translate("Network", "Upload:"))
+        self.speedTestButton.setText(_translate("Network", "Lancer le Speedtest"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    NetworkUI = QtWidgets.QWidget()
-    ui = Ui_NetworkUI()
-    ui.setupUi(NetworkUI)
-    NetworkUI.show()
+    Network = QtWidgets.QWidget()
+    ui = Ui_Network()
+    ui.setupUi(Network)
+    Network.show()
     sys.exit(app.exec_())

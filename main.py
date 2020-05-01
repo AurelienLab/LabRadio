@@ -45,8 +45,8 @@ class Main(Ui_MainWindow):
         menu.ui.renderItems()
 
     # UI FUNCTIONS
-    def fullScreen(self, MainWindow):
 
+    def fullScreen(self, MainWindow):
         # GET CURRENT STATE
         state = MainWindow.windowState()
 
@@ -69,9 +69,6 @@ class Main(Ui_MainWindow):
             self.previousButton.setDisabled(False)
             self.previousButton.show()
             self.previousButton.clicked.connect(lambda: parentPage.show())
-
-    def on_Page_showed(self, Page):
-        print('Changement de page')
 
 
 if __name__ == "__main__":

@@ -1,9 +1,7 @@
-from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
 
 class Page(QWidget):
-    showed = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, name, UI_Obj):
         super().__init__()
@@ -44,4 +42,3 @@ class Page(QWidget):
     # SWITCH STACKED WIDGET TO THIS PAGE
     def show(self):
         self.stack.setCurrentWidget(self)
-        self.showed.emit(self)

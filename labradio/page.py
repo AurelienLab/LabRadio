@@ -1,24 +1,31 @@
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtWidgets import QWidget
 
 
-class Page:
+class Page(QWidget):
+
+    showed = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, name, UI_Obj):
+        super().__init__()
+
         # DISPLAY NAME
         self.name = name
 
         # WIDGET INIT
-        self.widget = QtWidgets.QWidget()
+        # self.widget = QtWidgets.QWidget()
         self.ui = UI_Obj
-        self.ui.setupUi(self.widget)
+        self.ui.setupUi(self)
+        self.setAccessibleName(name)
 
         # OPTIONAL PROPERTIES
         self.stack = None
-        self.parent = None
+        self.parentPage = None
 
     # ADD WIDGET TO A STACKED WIDGET
     def addToStack(self, stack):
-        stack.addWidget(self.widget)
+        stack.addWidget(self)
         self.stack = stack
         return self
 
@@ -28,15 +35,17 @@ class Page:
 
     # SET PARENT PAGE
     def setParent(self, page):
-        self.parent = page
+        self.parentPage = page
         return self
 
     # ADD PAGE TO AUTOMATIC MENU
     def addToMenu(self, menu):
         menu.ui.addItem(self)
+        self.setParent(menu)
         return self
 
     # SWITCH STACKED WIDGET TO THIS PAGE
     def show(self):
-        print('test')
-        self.stack.setCurrentWidget(self.widget)
+        self.stack.setCurrentWidget(self)
+        self.showed.emit(self)
+

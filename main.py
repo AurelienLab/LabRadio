@@ -1,21 +1,15 @@
+from PyQt5.QtCore import Qt
+
 from labradio.network.network import Network
-from labradio.utils.menu.menu import Menu
 from labradio.page import Page
+from labradio.utils.menu.menu import Menu
 from main_ui import Ui_MainWindow
-from PyQt5.QtCore import Qt, pyqtSlot, QObject
-from PyQt5 import QtCore
 
 
 class Main(Ui_MainWindow):
 
-    def __init__(self):
-        super().__init__()
-
-        QtCore.QMetaObject.connectSlotsByName(self)
-
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
-        # self.stackedWidget.currentChanged.connect(lambda: self.pageTitle.setText(self.stackedWidget.currentWidget().accessibleName))
         self.stackedWidget.currentChanged.connect(self.updateTopBar)
 
         self.quitButton.clicked.connect(app.quit)
@@ -39,9 +33,14 @@ class Main(Ui_MainWindow):
         # DUPLEX MENU
         menu_duplex = Page('Duplex', Menu())
 
+        # MONITORING MENU
+        menu_monitoring = Page('Monitoring', Menu())
+
         # ADD PAGES TO MAIN MENU
         menu_network.addToStack(self.stackedWidget).addToMenu(menu)
         menu_duplex.addToStack(self.stackedWidget).addToMenu(menu)
+        menu_monitoring.addToStack(self.stackedWidget).addToMenu(menu)
+
 
         # MENU RENDER
         menu.ui.renderItems()

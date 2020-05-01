@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QThreadPool
+
 from labradio.network import ipv4
 from labradio.network import test
 from labradio.network.network_ui import Ui_Network
@@ -53,7 +54,7 @@ class Network(Ui_Network):
         self.upload = results['upload']
         self.download = results['download']
 
-    def get_upload(self, unit = 'Mb', string = 0):
+    def get_upload(self, unit='Mb', string=0):
         if unit == 'Mb':
             if string:
                 return conversion.bit_to_mb_str(self.upload)
@@ -65,7 +66,7 @@ class Network(Ui_Network):
             else:
                 return round(self.upload, 2)
 
-    def get_download(self, unit = 'Mb', string = 0):
+    def get_download(self, unit='Mb', string=0):
         if unit == 'Mb':
             if string:
                 return conversion.bit_to_mb_str(self.download)
@@ -81,6 +82,7 @@ class Network(Ui_Network):
 if __name__ == "__main__":
     import sys
     from PyQt5 import QtWidgets
+
     app = QtWidgets.QApplication(sys.argv)
     NetworkUI = QtWidgets.QWidget()
     ui = Network()

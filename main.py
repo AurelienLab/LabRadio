@@ -41,7 +41,6 @@ class Main(Ui_MainWindow):
         menu_duplex.addToStack(self.stackedWidget).addToMenu(menu)
         menu_monitoring.addToStack(self.stackedWidget).addToMenu(menu)
 
-
         # MENU RENDER
         menu.ui.renderItems()
 
@@ -71,14 +70,13 @@ class Main(Ui_MainWindow):
             self.previousButton.show()
             self.previousButton.clicked.connect(lambda: parentPage.show())
 
-
     def on_Page_showed(self, Page):
         print('Changement de page')
 
 
 if __name__ == "__main__":
     import sys
-    from PyQt5 import QtWidgets, QtCore
+    from PyQt5 import QtWidgets
 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()

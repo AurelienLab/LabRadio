@@ -1,8 +1,9 @@
-import requests
 import socket
 
+import requests
 
-def get_public_ip(server = 'https://ipinfo.io/json'):
+
+def get_public_ip(server='https://ipinfo.io/json'):
     response = requests.get(server, verify=True)
     data = response.json()
 

@@ -1,5 +1,6 @@
-import speedtest
 import sys
+
+import speedtest
 
 
 def speed(progress_callback=None):

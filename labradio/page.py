@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QWidget
 
 
 class Page(QWidget):
-
     showed = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, name, UI_Obj):
@@ -13,7 +12,6 @@ class Page(QWidget):
         self.name = name
 
         # WIDGET INIT
-        # self.widget = QtWidgets.QWidget()
         self.ui = UI_Obj
         self.ui.setupUi(self)
         self.setAccessibleName(name)
@@ -47,4 +45,3 @@ class Page(QWidget):
     def show(self):
         self.stack.setCurrentWidget(self)
         self.showed.emit(self)
-

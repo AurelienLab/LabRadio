@@ -27,6 +27,7 @@ class Ui_Menu(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     Menu = QtWidgets.QWidget()
     ui = Ui_Menu()

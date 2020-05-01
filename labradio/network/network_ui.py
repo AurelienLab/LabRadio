@@ -127,6 +127,7 @@ class Ui_Network(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     Network = QtWidgets.QWidget()
     ui = Ui_Network()

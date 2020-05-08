@@ -1,3 +1,5 @@
 requests
-speedtest-cli
-PyQt5
+speedtest-cli>=2.1.2
+setuptools
+cffi>=1.14.0
+JACK-Client=0.4.5

@@ -1,34 +1,100 @@
-#!/usr/bin/python3
-# VU meter written in Python (www.python.org) by Tim Howlett 1st April 2013,
-# Does not work with Python 2.7.3 or 2.7.4 Does work with 3.2.3
-# Requires the Pygame module (www.pygame.org)and the Pyaudio module (http://people.csail.mit.edu/hubert/pyaudio/)
+import traceback
 
-import sys, pygame, pyaudio, wave, audioop, math
-from pygame.locals import *
+from PyQt5.QtCore import *
 
 
-class VuMeter(object):
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
+    data = pyqtSignal(tuple)
+
+
+class Worker(QRunnable):
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+        # Add the callback to our kwargs
+
+        self.kwargs['data_callback'] = self.signals.data
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
+
+
+import pyaudio, audioop, math
+
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QPainter, QPen, QBrush
+from PyQt5.QtCore import Qt, QThreadPool
+from PyQt5.QtWidgets import QApplication, QWidget
+
+
+
+class VuMeter(QWidget):
+
     def __init__(self, width=130, height=500):
+        super().__init__()
         self.width = width
         self.height = height
 
         self.init_view()
         self.init_audio()
 
+        self.started = False
+
+        self.threadpool = QThreadPool()
+
+        worker = Worker(self.loop)
+        worker.signals.data.connect(self.draw)
+        self.threadpool.start(worker)
+
+
     def init_view(self):
+        self.setGeometry(0, 0, self.width, self.height)
         self.bg_color = (0, 0, 0)
         self.peakL = 0
         self.peakR = 0
 
-        pygame.init()
-        pygame.mixer.quit()
-
-        self.display = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption('VU Meter')  # A SUPPRIMER ?
-
-        self.fontSmall = pygame.font.Font('freesansbold.ttf', round(0.1 * self.width))
-
         self.calculate_sizes()
+        # self.fontSmall = pygame.font.Font('freesansbold.ttf', round(0.1 * self.width))
+        self.setStyleSheet("background-color: rgb(0, 0, 0);")
+
+    def init_audio(self):
+        self.pa = pyaudio.PyAudio()
+
+        self.pa_infos = self.pa.get_default_input_device_info()
+        self.samplerate = int(self.pa_infos['defaultSampleRate'])
+
+        print(self.pa_infos)  # DEBUG
+
+        self.pa_stream = self.pa.open(format=pyaudio.paInt16,
+                                      channels=2,
+                                      rate=self.samplerate,
+                                      input=True,
+                                      frames_per_buffer=1024)
 
     def calculate_sizes(self):
         W = self.width
@@ -54,95 +120,95 @@ class VuMeter(object):
         self.ecart = round(self.exp_height / 40)
 
         self.start_meter_R = self.end_line_R
-        self.end_meter_R = self.start_meter_R + self.rect_height
+        self.end_meter_R = self.start_meter_R + self.rect_width
 
         self.exp_height_peak = self.exp_height + 10
 
-
-    def init_audio(self):
-        self.pa = pyaudio.PyAudio()
-
-        self.pa_infos = self.pa.get_default_input_device_info()
-        self.samplerate = int(self.pa_infos['defaultSampleRate'])
-
-        print(self.pa_infos)  # DEBUG
-
-        self.pa_stream = self.pa.open(format=pyaudio.paInt16,
-                                      channels=2,
-                                      rate=self.samplerate,
-                                      input=True,
-                                      frames_per_buffer=1024)
-
-    def draw(self, levelL, levelR):
-        self.display.fill(self.bg_color)
-
-        # Write the scale and draw in the lines
-        for dB in range(0, 60, 4):
-            number = str(dB)
-            text = self.fontSmall.render("-" + number, 1, (255, 255, 255))
-            textpos = text.get_rect()
-            self.display.blit(text, (self.start_text, (self.rect_height_margin * dB)))
-            pygame.draw.line(self.display, (255, 255, 255), (self.start_line_L, 5 + (self.rect_height_margin * dB)), (self.end_line_L, 5 + (self.rect_height_margin * dB)), 1)
-            pygame.draw.line(self.display, (255, 255, 255), (self.start_line_R, 5 + (self.rect_height_margin * dB)), (self.end_line_R, 5 + (self.rect_height_margin * dB)), 1)
-
-        # Draw the boxes
-        for i in range(0, levelL):
-            if i < 20:
-                pygame.draw.rect(self.display, (0, 192, 0), (self.start_meter_L, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-            elif i >= 20 and i < 30:
-                pygame.draw.rect(self.display, (255, 255, 0), (self.start_meter_L, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-            else:
-                pygame.draw.rect(self.display, (255, 0, 0), (self.start_meter_L, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-        for i in range(0, levelR):
-            if i < 20:
-                pygame.draw.rect(self.display, (0, 192, 0), (self.start_meter_R, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-            elif i >= 20 and i < 30:
-                pygame.draw.rect(self.display, (255, 255, 0), (self.start_meter_R, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-            else:
-                pygame.draw.rect(self.display, (255, 0, 0), (self.start_meter_R, (self.exp_height - i * self.ecart), self.rect_width, self.rect_height))
-        # Draw the peak bars
-        pygame.draw.rect(self.display, (255, 255, 255), (self.start_meter_L, (self.exp_height_peak - int(self.peakL) * self.ecart), self.rect_width, 2))
-        pygame.draw.rect(self.display, (255, 255, 255), (self.start_meter_R, (self.exp_height_peak - int(self.peakR) * self.ecart), self.rect_width, 2))
-
-    def loop(self):
+    def loop(self, data_callback):
         while True:
             data = self.pa_stream.read(1024, exception_on_overflow=False)
 
             ldata = audioop.tomono(data, 2, 1, 0)
             amplitudel = ((audioop.max(ldata, 2)) / 32767)
-            LevelL = (int(41 + (20 * (math.log10(amplitudel + (1e-40))))))
+            self.LevelL = (int(41 + (20 * (math.log10(amplitudel + (1e-40))))))
             rdata = audioop.tomono(data, 2, 0, 1)
             amplituder = ((audioop.max(rdata, 2)) / 32767)
-            LevelR = (int(41 + (20 * (math.log10(amplituder + (1e-40))))))
+            self.LevelR = (int(41 + (20 * (math.log10(amplituder + (1e-40))))))
 
-            if LevelL > self.peakL:
-                self.peakL = LevelL
+            if self.LevelL > self.peakL:
+                self.peakL = self.LevelL
             elif self.peakL > 0:
                 self.peakL = self.peakL - 0.2
-            if LevelR > self.peakR:
-                self.peakR = LevelR
+            if self.LevelR > self.peakR:
+                self.peakR = self.LevelR
             elif self.peakR > 0:
                 self.peakR = self.peakR - 0.2
 
-            self.draw(LevelL, LevelR)
+            dataTuple = (self.LevelL, self.LevelR, self.peakL, self.peakR)
 
-            pygame.display.update()
+            data_callback.emit(dataTuple)
+
+    def draw(self, data):
+        self.LevelL = data[0]
+        self.LevelR = data[1]
+        self.peakL = data[2]
+        self.peakR = data[3]
+
+        self.repaint()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+
+        # DRAW THE MIDDLE SCALE
+        painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
+        for dB in range(0, 60, 4):
+            number = str(dB)
+            current_height = self.rect_height_margin * dB + 5
+            painter.drawText(self.start_text, current_height + 5, '-'+number)
+            painter.drawLine(self.start_line_L, current_height, self.end_line_L, current_height)
+            painter.drawLine(self.start_line_R, current_height, self.end_line_R, current_height)
+
+        painter.setPen(QPen(Qt.black, 0, Qt.SolidLine))
+        for i in range(0, self.LevelL):
+            current_height = self.exp_height - i * self.ecart
+            if i < 20:
+                painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
+            elif 20 <= i < 30:
+                painter.setBrush(QBrush(Qt.yellow, Qt.SolidPattern))
+            else:
+                painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
+
+            painter.drawRect(self.start_meter_L, current_height, self.rect_width, self.rect_height)
+
+        for i in range(0, self.LevelR):
+            current_height = self.exp_height - i * self.ecart
+            if i < 20:
+                painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
+            elif 20 <= i < 30:
+                painter.setBrush(QBrush(Qt.yellow, Qt.SolidPattern))
+            else:
+                painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
+
+            painter.drawRect(self.start_meter_R, current_height, self.rect_width, self.rect_height)
+
+        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        painter.drawLine(self.start_meter_L,
+                         (self.exp_height_peak - int(self.peakL) * self.ecart),
+                         self.end_meter_L,
+                         (self.exp_height_peak - int(self.peakL) * self.ecart))
+        painter.drawLine(self.start_meter_R,
+                         (self.exp_height_peak - int(self.peakR) * self.ecart),
+                         self.end_meter_R,
+                         (self.exp_height_peak - int(self.peakR) * self.ecart))
+
 
 if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    vumeter = VuMeter(width=150, height=300)
 
-    import pyaudio
-
-    p = pyaudio.PyAudio()
-    info = p.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            print
-            "Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name')
-
-    vumeter = VuMeter(width=180, height=600)
-
-    vumeter.loop()
+    vumeter.show()
+    sys.exit(app.exec())
 
 
 

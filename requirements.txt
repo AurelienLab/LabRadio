@@ -1,6 +1,6 @@
+pyqt5
 requests
 speedtest-cli>=2.1.2
 setuptools
-cffi>=1.14.0
 pyaudio
 openob

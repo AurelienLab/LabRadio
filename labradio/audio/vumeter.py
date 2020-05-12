@@ -47,7 +47,7 @@ class Worker(QRunnable):
 import pyaudio, audioop, math
 
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QPainter, QPen, QBrush
+from PyQt5.QtGui import QPainter, QPen, QBrush, QPalette, QFont
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
 
@@ -60,17 +60,34 @@ class VuMeter(QWidget):
         self.width = width
         self.height = height
 
-        self.init_view()
+        # self.init_view()
         self.init_audio()
 
         self.started = False
 
         self.threadpool = QThreadPool()
 
+
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        # self.adjustSize()
+        self.width = self.frameGeometry().width()
+        self.height = self.frameGeometry().height()
+
+        self.init_view()
+
         worker = Worker(self.loop)
         worker.signals.data.connect(self.draw)
         self.threadpool.start(worker)
 
+    def resizeEvent(self, QResizeEvent):
+        super().resizeEvent(QResizeEvent)
+
+        self.width = self.frameGeometry().width()
+        self.height = self.frameGeometry().height()
+
+        self.calculate_sizes()
 
     def init_view(self):
         self.setGeometry(0, 0, self.width, self.height)
@@ -80,15 +97,18 @@ class VuMeter(QWidget):
 
         self.calculate_sizes()
         # self.fontSmall = pygame.font.Font('freesansbold.ttf', round(0.1 * self.width))
-        self.setStyleSheet("background-color: rgb(0, 0, 0);")
+        # self.setStyleSheet("background-color: rgb(0, 0, 0);")
+
+        pal = self.palette()
+        pal.setColor(QPalette.Background, Qt.black)
+        self.setAutoFillBackground(True)
+        self.setPalette(pal)
 
     def init_audio(self):
         self.pa = pyaudio.PyAudio()
 
         self.pa_infos = self.pa.get_default_input_device_info()
         self.samplerate = int(self.pa_infos['defaultSampleRate'])
-
-        print(self.pa_infos)  # DEBUG
 
         self.pa_stream = self.pa.open(format=pyaudio.paInt16,
                                       channels=2,
@@ -100,24 +120,25 @@ class VuMeter(QWidget):
         W = self.width
         H = self.height
 
-        self.side_margin = round(W * 0.07)
-        self.exp_height = round(H - (H*0.05))
-        self.rect_height_margin = round(self.exp_height / 40)
+        self.side_margin = W * 0.04
+        exp_width = self.width - (2 * self.side_margin)
+        self.exp_height = H - (H*0.05)
+        self.rect_height_margin = self.exp_height / 40
         self.rect_height = self.rect_height_margin - 1
-        self.rect_width = round(0.23 * W)
+        self.rect_width = 0.21 * W
 
         self.start_meter_L = self.side_margin
         self.end_meter_L = self.start_meter_L + self.rect_width
 
-        self.middle_width = round(0.38 * W)
+        self.middle_width = 0.42 * W
         self.start_middle = self.end_meter_L
         self.start_line_L = self.start_middle
-        self.end_line_L = self.start_line_L + self.rect_height
-        self.start_text = self.end_line_L + round(0.5 * self.side_margin)
-        self.start_line_R = self.end_line_L + round(0.6 * self.middle_width)
-        self.end_line_R = self.start_line_R + self.rect_height
+        self.end_line_L = self.start_line_L + 0.3 * self.middle_width
+        self.start_text = self.end_line_L + 0.10 * self.middle_width
+        self.start_line_R = self.end_line_L + 0.6 * self.middle_width
+        self.end_line_R = self.start_line_R + 0.3 * self.middle_width
 
-        self.ecart = round(self.exp_height / 40)
+        self.ecart = self.exp_height / 40
 
         self.start_meter_R = self.end_line_R
         self.end_meter_R = self.start_meter_R + self.rect_width
@@ -161,9 +182,10 @@ class VuMeter(QWidget):
 
         # DRAW THE MIDDLE SCALE
         painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
+        painter.setFont(QFont("Helvetica", round(0.08 * self.width)))
         for dB in range(0, 60, 4):
             number = str(dB)
-            current_height = self.rect_height_margin * dB + 5
+            current_height = self.rect_height_margin * dB + 10
             painter.drawText(self.start_text, current_height + 5, '-'+number)
             painter.drawLine(self.start_line_L, current_height, self.end_line_L, current_height)
             painter.drawLine(self.start_line_R, current_height, self.end_line_R, current_height)

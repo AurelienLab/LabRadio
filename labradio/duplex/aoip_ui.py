@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Aoip(object):
     def setupUi(self, Aoip):
         Aoip.setObjectName("Aoip")
-        Aoip.resize(810, 467)
+        Aoip.resize(854, 581)
         self.gridLayout_3 = QtWidgets.QGridLayout(Aoip)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.btnConnect = QtWidgets.QPushButton(Aoip)
@@ -34,6 +34,8 @@ class Ui_Aoip(object):
         self.label.setObjectName("label")
         self.meters.addWidget(self.label, 1, 0, 1, 1)
         self.inputMeter = QtWidgets.QWidget(Aoip)
+        self.inputMeter.setMinimumSize(QtCore.QSize(87, 356))
+        self.inputMeter.setStyleSheet("")
         self.inputMeter.setObjectName("inputMeter")
         self.meters.addWidget(self.inputMeter, 0, 0, 1, 1)
         self.meters.setColumnStretch(0, 1)

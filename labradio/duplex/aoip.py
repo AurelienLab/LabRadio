@@ -10,11 +10,7 @@ class Aoip(Ui_Aoip):
     def setupUi(self, AoipUI):
         super().setupUi(AoipUI)
 
-        # BINDINGS
-        inputMeterW = self.inputMeter.geometry().width()
-        inputMeterH = self.inputMeter.geometry().height()
-        print(str(inputMeterW) + " " + str(inputMeterH))
-        newInputMeter = VuMeter(width=80, height=356)  # QWidget
+        newInputMeter = VuMeter()  # QWidget
         self.meters.replaceWidget(self.inputMeter, newInputMeter)
 
 

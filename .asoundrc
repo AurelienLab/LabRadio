@@ -1,0 +1,37 @@
+pcm.loopout {
+    type dmix
+    ipc_key 547964
+    slave.pcm "hw:0,0"
+    slave.buffer_size 6144
+    slave.period_size 2048
+    slave.periods 3
+    slave.rate 44100
+    slave.channels 2
+}
+
+pcm.loopin {
+    type dsnoop
+    ipc_key 876942
+    slave.pcm "hw:0,0"
+    slave.channels 2
+    slave.rate 48000
+    slave.buffer_size 6144
+    slave.period_size 2048
+    slave.periods 3
+    bindings {
+	0 0
+	1 1
+    }
+}
+
+pcm.loop {
+    type plug
+    slave {
+	pcm {
+	    type asym
+	    playback.pcm "loopout"
+	    capture.pcm "loopin"
+	}
+	channels 2
+    }
+}

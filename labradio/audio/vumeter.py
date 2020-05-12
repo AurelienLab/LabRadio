@@ -1,6 +1,7 @@
 import traceback
 
 from PyQt5.QtCore import *
+import sys
 
 
 class WorkerSignals(QObject):

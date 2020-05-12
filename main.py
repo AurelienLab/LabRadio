@@ -1,10 +1,11 @@
 from PyQt5.QtCore import Qt
 
 from labradio.network.network import Network
+from labradio.duplex.aoip import Aoip
 from labradio.page import Page
 from labradio.utils.menu.menu import Menu
 from main_ui import Ui_MainWindow
-
+import sys
 
 class Main(Ui_MainWindow):
 
@@ -32,6 +33,11 @@ class Main(Ui_MainWindow):
 
         # DUPLEX MENU
         menu_duplex = Page('Duplex', Menu())
+
+        page_duplex_aoip = Page('OpenOB', Aoip())
+        page_duplex_aoip.addToStack(self.stackedWidget).addToMenu(menu_duplex)
+
+        menu_duplex.ui.renderItems()
 
         # MONITORING MENU
         menu_monitoring = Page('Monitoring', Menu())

@@ -3,7 +3,6 @@ import traceback
 from PyQt5.QtCore import *
 import sys
 
-
 class WorkerSignals(QObject):
     finished = pyqtSignal()
     error = pyqtSignal(tuple)
@@ -61,6 +60,11 @@ class VuMeter(QWidget):
         self.width = width
         self.height = height
 
+        self.LevelL = 0
+        self.LevelR = 0
+        self.peakL = 0
+        self.peakR = 0
+
         # self.init_view()
         self.init_audio()
 
@@ -110,8 +114,10 @@ class VuMeter(QWidget):
 
         self.pa_infos = self.pa.get_default_input_device_info()
         self.samplerate = int(self.pa_infos['defaultSampleRate'])
+        print(self.pa_infos)
 
-        self.pa_stream = self.pa.open(format=pyaudio.paInt16,
+        self.pa_stream = self.pa.open(output_device_index=2,
+                                      format=pyaudio.paInt16,
                                       channels=2,
                                       rate=self.samplerate,
                                       input=True,

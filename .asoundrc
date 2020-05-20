@@ -5,7 +5,7 @@ pcm.loopout {
     slave.buffer_size 6144
     slave.period_size 2048
     slave.periods 3
-    slave.rate 44100
+    slave.rate 48000
     slave.channels 2
 }
 
@@ -19,12 +19,12 @@ pcm.loopin {
     slave.period_size 2048
     slave.periods 3
     bindings {
-	0 0
-	1 1
+        0 0
+        1 1
     }
 }
 
-pcm.loop {
+pcm.!default {
     type plug
     slave {
 	pcm {
